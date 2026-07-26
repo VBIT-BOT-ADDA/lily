@@ -25,26 +25,9 @@ class Config:
         self.SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/titanic_network")
         self.SUPPORT_CHAT = getenv("SUPPORT_CHAT", "https://t.me/+WAOT47P-70QwOTBl")
 
-        self.YTPROXY_URL = getenv("YTPROXY_URL", "https://tgapi.xbitcode.com")  # xBit Music Endpoint
-        self.YT_API_KEY = getenv("YT_API_KEY", "")  # Get from https://t.me/tgmusic_apibot
-
-        # Self-hosted YouTube API proxy (apihub Heroku app).
-        self.LILY_API_URL = getenv(
-            "LILY_API_URL", "https://apihub-cebe91de7ae2.herokuapp.com"
-        )
-        self.LILY_API_KEY = getenv(
-            "LILY_API_KEY", "lily_mOVOd9TG7zuE4L9QDxEndbiyjQc9he"
-        )
-        self.RAILWAY_YT_API_URL = getenv(
-            "RAILWAY_YT_API_URL", self.LILY_API_URL
-        )
-        self.RAILWAY_YT_API_KEY = getenv(
-            "RAILWAY_YT_API_KEY", self.LILY_API_KEY
-        )
-
-        # Shruti API — Primary download source (get key from @SHRUTIAPIBOT)
-        self.SHRUTI_API_URL = getenv("SHRUTI_API_URL", "http://api01.shrutibots.site")
-        self.SHRUTI_API_KEY = getenv("SHRUTI_API_KEY", "")
+        # Railway self-hosted YouTube API proxy
+        self.RAILWAY_YT_API_URL = getenv("RAILWAY_YT_API_URL", "")
+        self.RAILWAY_YT_API_KEY = getenv("RAILWAY_YT_API_KEY", "")
         
         self.AUTO_LEAVE: bool = getenv("AUTO_LEAVE", "False").lower() == "true"
         self.AUTO_END: bool = getenv("AUTO_END", "False").lower() == "true"
@@ -69,12 +52,6 @@ class Config:
         self.ERROR_LOG: bool = getenv("ERROR_LOG", "True").lower() == "true"
 
         self.LANG_CODE = getenv("LANG_CODE", "en")
-
-        self.COOKIES_URL = [
-            url for url in getenv("COOKIES_URL", "").split(" ")
-            if url and "batbin.me" in url
-        ]
-        self.COOKIES_DATA = getenv("COOKIES_DATA", "")
         self.DEFAULT_THUMB = getenv("DEFAULT_THUMB", "https://te.legra.ph/file/3e40a408286d4eda24191.jpg")
         self.PING_IMG = getenv("PING_IMG", "https://files.catbox.moe/haagg2.png")
         self.START_IMG = getenv("START_IMG", "https://files.catbox.moe/zvziwk.jpg")

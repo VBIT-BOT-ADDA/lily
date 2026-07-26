@@ -108,12 +108,8 @@ USAGE_EXAMPLES = """<emoji id=5852843197181370128>💡</emoji> <u><b>Quick Examp
 
 USAGE_TIPS = """<emoji id=5773626993010546707>🎶</emoji> <u><b>Tips & Notes</b></u>
 
-<b>Download Chain (fastest to slowest):</b>
-  1️⃣  Cookies Base64  — fastest, uses your YouTube account cookies
-  2️⃣  Railway API     — self-hosted YouTube proxy
-  3️⃣  Shruti API      — third-party fallback
-  4️⃣  xBit API        — third-party fallback
-  5️⃣  yt-dlp          — local last resort
+<b>Download & Streaming:</b>
+  • Railway YT API — self-hosted YouTube proxy (Active)
 
 <b>Streaming:</b>
   • Songs start playing instantly via stream URL (no download wait).
