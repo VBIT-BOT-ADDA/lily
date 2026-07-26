@@ -34,8 +34,10 @@ from ishu.helpers._dataclass import Track
 SHRUTI_API_URL      = getattr(config, "SHRUTI_API_URL",      "https://api.shrutibots.site")
 SHRUTI_API_KEY      = getattr(config, "SHRUTI_API_KEY",      None)
 
-RAILWAY_YT_API_URL  = getattr(config, "RAILWAY_YT_API_URL",  None)
-RAILWAY_YT_API_KEY  = getattr(config, "RAILWAY_YT_API_KEY",  None)
+LILY_API_URL        = getattr(config, "LILY_API_URL",        None)
+LILY_API_KEY        = getattr(config, "LILY_API_KEY",        None)
+RAILWAY_YT_API_URL  = getattr(config, "RAILWAY_YT_API_URL",  None) or LILY_API_URL
+RAILWAY_YT_API_KEY  = getattr(config, "RAILWAY_YT_API_KEY",  None) or LILY_API_KEY
 
 YTPROXY_URL         = getattr(config, "YTPROXY_URL",         None)
 YT_API_KEY          = getattr(config, "YT_API_KEY",          None)
