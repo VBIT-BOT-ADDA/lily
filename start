@@ -1,10 +1,1 @@
-#!/usr/bin/env bash
-export PYTHONPATH=/app:${PYTHONPATH}
-
-if command -v uv &> /dev/null; then
-    exec uv run python3 -m ishu
-elif [ -x "/app/.venv/bin/python3" ]; then
-    exec /app/.venv/bin/python3 -m ishu
-else
-    exec python3 -m ishu
-fi
+python3 -m ishu
