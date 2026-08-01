@@ -864,18 +864,6 @@ class YouTube:
             logger.warning("search_similar_candidates error for '%s': %s", query, e)
             return []
 
-    async def get_stream_url(
-        self,
-        video_id: str,
-        video: bool = False,
-        force_cookies: bool = False,
-    ) -> str | None:
-        """
-        Get a direct stream URL for instant playback (no download).
-        Disabled: always returns None to force local download.
-        """
-        return None
-
     async def _store_in_dump(self, file_path: str, video_id: str, is_video: bool = False) -> None:
         """Upload downloaded track to STORAGE_GROUP_ID and save file_id + shared msg_id in MongoDB."""
         try:
