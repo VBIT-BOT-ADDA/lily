@@ -900,8 +900,6 @@ class YouTube:
             logger.warning("Failed to store %s in dump channel: %s", video_id, e)
 
 
-
-
     async def _raw_cold_download(self, video_id: str, video: bool = False) -> str | None:
         """Internal helper for cold YouTube download when cache is completely missing."""
         link = _normalize_youtube_link(video_id, self.base)
@@ -948,6 +946,25 @@ class YouTube:
             video_id=video_id,
             title=title or "",
             duration=0,
+            is_video=video,
+            downloader_fn=_dl_wrapper,
+        )
+
+    async def prefetch_song(
+        self,
+        video_id: str,
+        title: str | None = None,
+        video: bool = False,
+    ) -> None:
+        """Background prefetch for upcoming songs in queue."""
+        from ishu.core.cache_manager import cache_manager
+
+        async def _dl_wrapper(vid: str, is_vid: bool):
+            return await self._raw_cold_download(vid, is_vid)
+
+        await cache_manager.prefetch_song(
+            video_id=video_id,
+            title=title or "",
             is_video=video,
             downloader_fn=_dl_wrapper,
         )
