@@ -181,7 +181,7 @@ class HybridCacheManager:
                 except Exception as e:
                     logger.warning("Failed to persist refreshed file_id for %s: %s", doc.get("_id"), e)
 
-        # Attempt 1 (primary): fetch the message -> fresh file_reference -> download.
+        # Attempt 1 (primary): fetch the message → fresh file_reference → download.
         # Immune to cross-bot file_id expiry because get_messages re-resolves it.
         if channel_id and message_id:
             try:
