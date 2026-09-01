@@ -26,9 +26,18 @@ class Config:
         self.SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/titanic_network")
         self.SUPPORT_CHAT = getenv("SUPPORT_CHAT", "https://t.me/+WAOT47P-70QwOTBl")
 
-        # Self-hosted YouTube API — Heroku apihub proxy (X-API-Key = lily_mOVOd9TG7zuE4L9QDxEndbiyjQc9he).
-        self.RAILWAY_YT_API_URL = getenv("LILY_API_URL", getenv("RAILWAY_YT_API_URL", "https://apihub-cebe91de7ae2.herokuapp.com"))
-        self.RAILWAY_YT_API_KEY = getenv("LILY_API_KEY", getenv("RAILWAY_YT_API_KEY", "lily_mOVOd9TG7zuE4L9QDxEndbiyjQc9he"))
+        # YouTube Stream Gateway / API Proxy (vbit-api-store, Railway, Heroku proxy)
+        self.YT_STREAM_GATEWAY = getenv(
+            "YT_STREAM_GATEWAY",
+            getenv("YOUTUBE_API_URL", getenv("LILY_API_URL", getenv("RAILWAY_YT_API_URL", "https://vbit-api-store.vercel.app/api/v1/yt")))
+        )
+        self.YOUTUBE_API_KEY = getenv(
+            "YOUTUBE_API_KEY",
+            getenv("LILY_API_KEY", getenv("RAILWAY_YT_API_KEY", "v-bit-free-YOUR_UNIQUE_API_KEY"))
+        )
+        # Backward compatibility aliases
+        self.RAILWAY_YT_API_URL = self.YT_STREAM_GATEWAY
+        self.RAILWAY_YT_API_KEY = self.YOUTUBE_API_KEY
         
         self.AUTO_LEAVE: bool = getenv("AUTO_LEAVE", "False").lower() == "true"
         self.AUTO_END: bool = getenv("AUTO_END", "False").lower() == "true"

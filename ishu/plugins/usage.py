@@ -109,7 +109,7 @@ USAGE_EXAMPLES = """<emoji id=5852843197181370128>💡</emoji> <u><b>Quick Examp
 USAGE_TIPS = """<emoji id=5773626993010546707>🎶</emoji> <u><b>Tips & Notes</b></u>
 
 <b>Download & Streaming:</b>
-  • Railway YT API — self-hosted YouTube proxy (Active)
+  • VBIT-API-STORE Gateway — high-speed YouTube stream proxy (Active)
 
 <b>Streaming:</b>
   • Songs start playing instantly via stream URL (no download wait).

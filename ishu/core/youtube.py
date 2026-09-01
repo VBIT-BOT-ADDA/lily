@@ -25,8 +25,11 @@ from ishu.helpers import utils
 from ishu.helpers._dataclass import Track
 
 # ── Config ────────────────────────────────────────────────────────────────────
-RAILWAY_YT_API_URL  = getattr(config, "RAILWAY_YT_API_URL",  None)
-RAILWAY_YT_API_KEY  = getattr(config, "RAILWAY_YT_API_KEY",  None)
+YT_STREAM_GATEWAY   = getattr(config, "YT_STREAM_GATEWAY", getattr(config, "RAILWAY_YT_API_URL", None))
+YOUTUBE_API_KEY     = getattr(config, "YOUTUBE_API_KEY", getattr(config, "RAILWAY_YT_API_KEY", None))
+# Backward compatibility aliases
+RAILWAY_YT_API_URL  = YT_STREAM_GATEWAY
+RAILWAY_YT_API_KEY  = YOUTUBE_API_KEY
 
 DOWNLOAD_DIR        = "downloads"
 
@@ -259,14 +262,16 @@ def _extract_video_id(link: str) -> str | None:
     return cleaned if len(cleaned) == 11 else None
 
 
-# ── Downloader: Railway YT API + Direct yt-dlp Fallback ───────────────────
+# ── Downloader: YouTube Stream Gateway / API + Direct yt-dlp Fallback ───────
 async def _railway_download(video_id: str, media_type: str) -> str | None:
     """
-    Download via Railway self-hosted YouTube API proxy.
-    Streams the media directly from the Railway endpoint to a local file.
+    Download via YouTube Stream Gateway / API proxy (vbit-api-store, Railway, Heroku).
+    Streams the media directly from the gateway endpoint to a local file.
     Returns local file path on success, None on failure.
     """
-    if not RAILWAY_YT_API_URL or not RAILWAY_YT_API_KEY:
+    gateway_url = (YT_STREAM_GATEWAY or RAILWAY_YT_API_URL or "").rstrip("/")
+    api_key = YOUTUBE_API_KEY or RAILWAY_YT_API_KEY
+    if not gateway_url or not api_key:
         return None
 
     ext        = "mp4" if media_type == "video" else "mp3"
@@ -283,14 +288,14 @@ async def _railway_download(video_id: str, media_type: str) -> str | None:
 
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "X-API-Key": str(RAILWAY_YT_API_KEY),
+        "X-API-Key": str(api_key),
     }
     endpoints = ["play/video/hq", "play/video"] if media_type == "video" else ["play/audio"]
 
     try:
         session = _get_http_session()
         for endpoint in endpoints:
-            media_url = f"{RAILWAY_YT_API_URL}/{endpoint}?id={video_id}"
+            media_url = f"{gateway_url}/{endpoint}?id={video_id}&api_key={api_key}"
             try:
                 async with session.get(
                     media_url,
@@ -300,7 +305,7 @@ async def _railway_download(video_id: str, media_type: str) -> str | None:
                 ) as file_resp:
                     if file_resp.status != 200:
                         logger.warning(
-                            "Railway YT API stream failed: status %s for %s",
+                            "YouTube API stream failed: status %s for %s",
                             file_resp.status, endpoint,
                         )
                         continue
@@ -311,15 +316,15 @@ async def _railway_download(video_id: str, media_type: str) -> str | None:
 
                     if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
                         _evict_disk_cache()
-                        logger.info("Railway YT API ✓ %s → %s", video_id, file_path)
+                        logger.info("YouTube Gateway API ✓ %s → %s", video_id, file_path)
                         return file_path
             except Exception as ep_err:
-                logger.warning("Railway YT API endpoint %s failed for %s: %s", endpoint, video_id, ep_err)
+                logger.warning("YouTube Gateway API endpoint %s failed for %s: %s", endpoint, video_id, ep_err)
 
         return None
 
     except Exception as exc:
-        logger.warning("Railway YT API download failed for %s: %s", video_id, exc)
+        logger.warning("YouTube Gateway API download failed for %s: %s", video_id, exc)
         try:
             if os.path.exists(file_path):
                 os.remove(file_path)
@@ -394,25 +399,25 @@ async def _download_with_fallback(
     """
     video_id = _extract_video_id(link) or link
 
-    # Railway YT API is the primary, reliable path. yt-dlp almost always fails
-    # on Heroku IPs ("Sign in to confirm you're not a bot"), so retry Railway
+    # YouTube Stream Gateway is the primary, reliable path. yt-dlp almost always fails
+    # on host/cloud IPs ("Sign in to confirm you're not a bot"), so retry Gateway
     # up to 5 times with exponential backoff (2s, 4s, 8s, 16s) before giving up.
-    max_railway_attempts = 5
-    for attempt in range(1, max_railway_attempts + 1):
+    max_gateway_attempts = 5
+    for attempt in range(1, max_gateway_attempts + 1):
         result = await _railway_download(video_id, media_type)
         if result:
-            return result, "railway"
-        if attempt < max_railway_attempts:
+            return result, "gateway"
+        if attempt < max_gateway_attempts:
             wait = min(2 ** attempt, 30)
             logger.info(
-                "Railway YT API attempt %s/%s failed for %s. Retrying in %ss...",
-                attempt, max_railway_attempts, video_id, wait,
+                "YouTube Gateway API attempt %s/%s failed for %s. Retrying in %ss...",
+                attempt, max_gateway_attempts, video_id, wait,
             )
             await asyncio.sleep(wait)
 
     logger.warning(
-        "Railway YT API failed after %s attempts for %s. Trying yt-dlp fallback.",
-        max_railway_attempts, video_id,
+        "YouTube Gateway API failed after %s attempts for %s. Trying yt-dlp fallback.",
+        max_gateway_attempts, video_id,
     )
     result = await _direct_ytdlp_download(video_id, media_type)
     if result:
@@ -446,6 +451,7 @@ class YouTube:
 
         self.dl_stats = {
             "total_requests": 0,
+            "gateway":        0,
             "railway":        0,
             "failed":         0,
         }

@@ -45,14 +45,14 @@
             "value": "",
             "required": true
         },
-        "RAILWAY_YT_API_URL": {
-            "description": "Railway self-hosted YouTube API URL",
-            "value": "https://youtube-api-music-production-77fb.up.railway.app",
+        "YT_STREAM_GATEWAY": {
+            "description": "YouTube API Stream Gateway URL (e.g., https://vbit-api-store.vercel.app/api/v1/yt)",
+            "value": "https://vbit-api-store.vercel.app/api/v1/yt",
             "required": false
         },
-        "RAILWAY_YT_API_KEY": {
-            "description": "Railway self-hosted YouTube API Key",
-            "value": "jd7hSNs6ilyVu4i~EkFx4_yONJhz.5bx",
+        "YOUTUBE_API_KEY": {
+            "description": "YouTube API Key from VBIT-API-STORE",
+            "value": "v-bit-free-YOUR_UNIQUE_API_KEY",
             "required": false
         }
     }
