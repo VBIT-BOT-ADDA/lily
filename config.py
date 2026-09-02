@@ -26,8 +26,8 @@ class Config:
         self.SESSION2 = getenv("SESSION2", None)
         self.SESSION3 = getenv("SESSION3", None)
 
-        self.SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/titanic_network")
-        self.SUPPORT_CHAT = getenv("SUPPORT_CHAT", "https://t.me/+WAOT47P-70QwOTBl")
+        self.SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/VAMPIREUPDATES")
+        self.SUPPORT_CHAT = getenv("SUPPORT_CHAT", "https://t.me/VAMPIREUPDATES")
 
         # YouTube Stream Gateway / API Proxy (vbit-api-store, Railway, Heroku proxy)
         self.YT_STREAM_GATEWAY = getenv(
