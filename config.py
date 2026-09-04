@@ -32,11 +32,11 @@ class Config:
         # YouTube Stream Gateway / API Proxy (vbit-api-store, Railway, Heroku proxy)
         self.YT_STREAM_GATEWAY = getenv(
             "YT_STREAM_GATEWAY",
-            getenv("YOUTUBE_API_URL", getenv("LILY_API_URL", getenv("RAILWAY_YT_API_URL", "https://api.vbit-api-hub.com/api/v1")))
+            getenv("YOUTUBE_API_URL", getenv("LILY_API_URL", getenv("RAILWAY_YT_API_URL", "https://vbit-api-hub-4d4011c429dd.herokuapp.com/functions/youtube-gateway")))
         )
         self.YOUTUBE_API_KEY = getenv(
             "YOUTUBE_API_KEY",
-            getenv("LILY_API_KEY", getenv("RAILWAY_YT_API_KEY", "VBIT_API_254e15d587c190d6874fe758972e7c59b8497a06dd284b68"))
+            getenv("LILY_API_KEY", getenv("RAILWAY_YT_API_KEY", " VBIT_API_5ND97YLK_Q8XT8ZES"))
         )
         # Backward compatibility aliases
         self.RAILWAY_YT_API_URL = self.YT_STREAM_GATEWAY
