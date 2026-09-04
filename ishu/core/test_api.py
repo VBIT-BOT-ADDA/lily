@@ -3,8 +3,8 @@ import requests
 import os
 
 # API Gateway Config
-API_KEY = os.getenv("YOUTUBE_API_KEY", "v-bit-free-YOUR_UNIQUE_API_KEY")
-GATEWAY_URL = os.getenv("YT_STREAM_GATEWAY", "https://vbit-api-store.vercel.app/api/v1/yt")
+API_KEY = os.getenv("YOUTUBE_API_KEY", " VBIT_API_5ND97YLK_Q8XT8ZES")
+GATEWAY_URL = os.getenv("YT_STREAM_GATEWAY", "https://vbit-api-hub-4d4011c429dd.herokuapp.com/functions/youtube-gateway")
 
 
 def test_stream_gateway(video_id="dQw4w9WgXcQ", output_file="test_stream.mp3"):
