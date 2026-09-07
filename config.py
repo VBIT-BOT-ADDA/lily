@@ -36,7 +36,7 @@ class Config:
         )
         self.YOUTUBE_API_KEY = getenv(
             "YOUTUBE_API_KEY",
-            getenv("LILY_API_KEY", getenv("RAILWAY_YT_API_KEY", "vb_live_5dfbc774be220e0782fea0e808adb1a23dbab02602f7f1db"))
+            getenv("LILY_API_KEY", getenv("RAILWAY_YT_API_KEY", "vb_live_437d84632e58922c752693f1ded1357714abba8663dc2cc1"))
         )
         # Backward compatibility aliases
         self.RAILWAY_YT_API_URL = self.YT_STREAM_GATEWAY

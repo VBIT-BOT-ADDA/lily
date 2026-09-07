@@ -289,13 +289,45 @@ async def _railway_download(video_id: str, media_type: str) -> str | None:
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         "X-API-Key": str(api_key),
+        "x-api-key": str(api_key),
     }
-    endpoints = ["play/video/hq", "play/video"] if media_type == "video" else ["play/audio"]
 
     try:
         session = _get_http_session()
+
+        # Method 1: V-Bit API /videos endpoint (direct high-speed CDN stream_url)
+        videos_url = f"{gateway_url}/videos?id={video_id}&key={api_key}"
+        try:
+            async with session.get(
+                videos_url,
+                headers=headers,
+                timeout=aiohttp.ClientTimeout(total=45),
+            ) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    stream_url = (data.get("video") or {}).get("stream_url")
+                    if stream_url:
+                        async with session.get(
+                            stream_url,
+                            timeout=aiohttp.ClientTimeout(total=timeout_dl),
+                            allow_redirects=True,
+                        ) as stream_resp:
+                            if stream_resp.status == 200:
+                                with open(file_path, "wb") as fobj:
+                                    async for chunk in stream_resp.content.iter_chunked(512 * 1024):
+                                        fobj.write(chunk)
+
+                                if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+                                    _evict_disk_cache()
+                                    logger.info("YouTube Gateway API (stream_url) ✓ %s → %s", video_id, file_path)
+                                    return file_path
+        except Exception as api_err:
+            logger.debug("YouTube Gateway /videos endpoint error for %s: %s", video_id, api_err)
+
+        # Method 2: Gateway stream proxy endpoints (/play/video, /play/audio)
+        endpoints = ["play/video/hq", "play/video"] if media_type == "video" else ["play/audio"]
         for endpoint in endpoints:
-            media_url = f"{gateway_url}/{endpoint}?id={video_id}&api_key={api_key}"
+            media_url = f"{gateway_url}/{endpoint}?id={video_id}&api_key={api_key}&key={api_key}"
             try:
                 async with session.get(
                     media_url,
@@ -308,6 +340,29 @@ async def _railway_download(video_id: str, media_type: str) -> str | None:
                             "YouTube API stream failed: status %s for %s",
                             file_resp.status, endpoint,
                         )
+                        continue
+
+                    content_type = file_resp.headers.get("content-type", "").lower()
+                    if "application/json" in content_type:
+                        try:
+                            json_data = await file_resp.json()
+                            s_url = json_data.get("streamUrl") or json_data.get("stream_url") or (json_data.get("video") or {}).get("stream_url")
+                            if s_url:
+                                async with session.get(
+                                    s_url,
+                                    timeout=aiohttp.ClientTimeout(total=timeout_dl),
+                                    allow_redirects=True,
+                                ) as s_resp:
+                                    if s_resp.status == 200:
+                                        with open(file_path, "wb") as fobj:
+                                            async for chunk in s_resp.content.iter_chunked(512 * 1024):
+                                                fobj.write(chunk)
+                                        if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+                                            _evict_disk_cache()
+                                            logger.info("YouTube Gateway API JSON streamUrl ✓ %s → %s", video_id, file_path)
+                                            return file_path
+                        except Exception:
+                            pass
                         continue
 
                     with open(file_path, "wb") as fobj:
@@ -621,10 +676,55 @@ class YouTube:
                         view_count   = view_count,
                     )
 
-            return None
         except Exception as e:
-            logger.warning("YouTube search error for '%s': %s", query, e)
-            return None
+            logger.warning("YouTube search scraper error for '%s': %s", query, e)
+
+        # Fallback to V-Bit API /search gateway
+        gateway_url = (YT_STREAM_GATEWAY or RAILWAY_YT_API_URL or "").rstrip("/")
+        api_key = YOUTUBE_API_KEY or RAILWAY_YT_API_KEY
+        if gateway_url and api_key:
+            try:
+                session = _get_http_session()
+                headers = {"x-api-key": str(api_key), "X-API-Key": str(api_key)}
+                api_search_url = f"{gateway_url}/search"
+                params = {"part": "snippet", "q": query.strip(), "type": "video", "maxResults": 5, "key": str(api_key)}
+                async with session.get(api_search_url, params=params, headers=headers, timeout=aiohttp.ClientTimeout(total=20)) as s_resp:
+                    if s_resp.status == 200:
+                        s_data = await s_resp.json()
+                        items = s_data.get("results") or s_data.get("items") or []
+                        if items:
+                            first = items[0]
+                            vid_id = first.get("id") if isinstance(first.get("id"), str) else (first.get("id") or {}).get("videoId")
+                            if vid_id:
+                                title = first.get("title") or (first.get("snippet") or {}).get("title", "Track")
+                                dur_val = first.get("duration", 0)
+                                if isinstance(dur_val, (int, float)) and dur_val > 0:
+                                    m, s = divmod(int(dur_val), 60)
+                                    h, m = divmod(m, 60)
+                                    duration_min = f"{h:02d}:{m:02d}:{s:02d}" if h else f"{m:02d}:{s:02d}"
+                                    duration_sec = int(dur_val)
+                                else:
+                                    duration_min = "03:30"
+                                    duration_sec = 210
+                                thumb = (first.get("thumbnail") or ((first.get("snippet") or {}).get("thumbnails") or {}).get("high", {}).get("url") or "").split("?")[0]
+                                uploader = first.get("uploader") or (first.get("snippet") or {}).get("channelTitle", "")
+                                return Track(
+                                    id=vid_id,
+                                    title=title,
+                                    url=self.base + vid_id,
+                                    duration=duration_min,
+                                    duration_sec=duration_sec,
+                                    thumbnail=thumb or f"https://i.ytimg.com/vi/{vid_id}/hqdefault.jpg",
+                                    channel_name=uploader,
+                                    message_id=message_id,
+                                    video=video,
+                                    time=int(_time.time()),
+                                    view_count=first.get("view_count"),
+                                )
+            except Exception as api_exc:
+                logger.debug("V-Bit API search fallback error for '%s': %s", query, api_exc)
+
+        return None
 
     # ── Slider ────────────────────────────────────────────────────────────────
     async def slider(self, link: str, query_type: int, videoid: Union[bool, str] = None):

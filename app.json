@@ -46,13 +46,13 @@
             "required": true
         },
         "YT_STREAM_GATEWAY": {
-            "description": "YouTube API Stream Gateway URL (e.g., https://vbit-api-store.vercel.app/api/v1/yt)",
-            "value": "https://vbit-api-store.vercel.app/api/v1/yt",
+            "description": "YouTube API Stream Gateway URL (e.g., https://v-bit-api.vercel.app/api/v1/youtube)",
+            "value": "https://v-bit-api.vercel.app/api/v1/youtube",
             "required": false
         },
         "YOUTUBE_API_KEY": {
-            "description": "YouTube API Key from VBIT-API-STORE",
-            "value": "v-bit-free-YOUR_UNIQUE_API_KEY",
+            "description": "YouTube API Key from V-BIT API",
+            "value": "vb_live_437d84632e58922c752693f1ded1357714abba8663dc2cc1",
             "required": false
         }
     }
